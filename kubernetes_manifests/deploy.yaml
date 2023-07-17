@@ -1,0 +1,37 @@
+# aws eks update-kubeconfig --region eu-west-2 --name epo-flask-app-eks
+# k expose deploy flask-app-deploy --type=LoadBalancer --port=80 --target-port=9900
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: web-app
+  name: web-app
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: web-app
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: web-app
+    spec:
+      containers:
+        - image: public.ecr.aws/m3y1x5s9/bmi-app:latest
+          name: web-app
+          ports:
+            - containerPort: 9900
+          env:
+            - name: AUTHOR
+              value: Kubernetes
+          startupProbe:
+            httpGet:
+              path: /author
+              port: 9900
+            failureThreshold: 30
+            periodSeconds: 10
+status: {}
