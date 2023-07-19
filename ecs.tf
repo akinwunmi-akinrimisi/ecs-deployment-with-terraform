@@ -263,13 +263,29 @@ data "aws_availability_zones" "zones" {
 
 resource "aws_security_group" "ecs" {
   name_prefix = "${var.name}-sg"
-  description = "Security group for ecs task"
+  description = "Security group for ecs task; allow inbound traffic from load balancer"
+
+  ingress {
+    from_port   = 3000
+    to_port     = 3000
+    protocol    = "tcp"
+    security_groups = [aws_security_group.lb_sg.id]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
   vpc_id      = aws_vpc.app_vpc.id // Use the new VPC
   lifecycle {
     create_before_destroy = true
   }
 }
 
+/*
 resource "aws_security_group_rule" "allow_egress" {
   description       = "Allow egress to the internet"
   security_group_id = aws_security_group.ecs.id
@@ -288,13 +304,16 @@ resource "aws_security_group_rule" "app" {
   protocol          = "tcp"
   cidr_blocks       = ["0.0.0.0/0"]
 }
+*/
 
+/*
 resource "aws_security_group" "lb_sg" {
   name        = "${var.name}-lb-sg"
   description = "Allow inbound traffic on port 80"
   vpc_id      = aws_vpc.app_vpc.id
 }
-
+*/
+/*
 resource "aws_security_group_rule" "lb_ingress" {
   description      = "Allow inbound traffic on port 80"
   type             = "ingress"
@@ -304,6 +323,7 @@ resource "aws_security_group_rule" "lb_ingress" {
   cidr_blocks      = ["0.0.0.0/0"]
   security_group_id = aws_security_group.lb_sg.id
 }
+*/
 
 /* resource "aws_security_group_rule" "lb_egress" {
   description      = "Allow inbound traffic on port 80"
@@ -340,4 +360,34 @@ resource "aws_s3_bucket_policy" "lb_logs_policy" {
       }
     ]
   })
+}
+
+
+
+resource "aws_security_group" "lb_sg" {
+  name        = "${var.name}-lb-sg"
+  description = "Allow inbound traffic on port 80 and 443"
+  vpc_id      = aws_vpc.app_vpc.id
+  description = "Allow inbound traffic on ports 80 and 443"
+
+  ingress {
+    from_port   = 80
+    to_port     = 80
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  ingress {
+    from_port   = 443
+    to_port     = 443
+    protocol    = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+
+  egress {
+    from_port   = 0
+    to_port     = 0
+    protocol    = "-1"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
 }
