@@ -1,5 +1,5 @@
 // ECR repo
-resource "aws_ecr_repository" "repo" {
+/* resource "aws_ecr_repository" "repo" {
   name                 = "${var.name}-repo"
   image_tag_mutability = "MUTABLE"
   force_delete         = true
@@ -15,7 +15,7 @@ resource "null_resource" "push_image" {
       REPO_URL              = "public.ecr.aws/m3y1x5s9/bmi-app:latest"
     }
   }
-}
+} */
 
 resource "aws_kms_key" "key" {
   description             = "${var.name}-kms"
@@ -105,7 +105,7 @@ resource "aws_ecs_task_definition" "task" {
   container_definitions = jsonencode([
     {
       name   = "web-app"
-      image  = "public.ecr.aws/m3y1x5s9/bmi-app:latest"
+      image  = "public.ecr.aws/m3y1x5s9/newbmiapp:latest"
       cpu    = 2
       memory = 512
       logConfiguration : {
@@ -126,7 +126,7 @@ resource "aws_ecs_task_definition" "task" {
       ]
     }
   ])
-  depends_on = [null_resource.push_image]
+  /* depends_on = [null_resource.push_image] */
 }
 
 // Create a new VPC
@@ -285,56 +285,6 @@ resource "aws_security_group" "ecs" {
   }
 }
 
-/*
-resource "aws_security_group_rule" "allow_egress" {
-  description       = "Allow egress to the internet"
-  security_group_id = aws_security_group.ecs.id
-  type              = "egress"
-  from_port         = 0
-  to_port           = 0
-  protocol          = "-1"
-  cidr_blocks       = ["0.0.0.0/0"]
-}
-
-resource "aws_security_group_rule" "app" {
-  security_group_id = aws_security_group.ecs.id
-  type              = "ingress"
-  from_port         = 3000
-  to_port           = 3000
-  protocol          = "tcp"
-  cidr_blocks       = ["0.0.0.0/0"]
-}
-*/
-
-/*
-resource "aws_security_group" "lb_sg" {
-  name        = "${var.name}-lb-sg"
-  description = "Allow inbound traffic on port 80"
-  vpc_id      = aws_vpc.app_vpc.id
-}
-*/
-/*
-resource "aws_security_group_rule" "lb_ingress" {
-  description      = "Allow inbound traffic on port 80"
-  type             = "ingress"
-  from_port        = 80
-  to_port          = 80
-  protocol         = "tcp"
-  cidr_blocks      = ["0.0.0.0/0"]
-  security_group_id = aws_security_group.lb_sg.id
-}
-*/
-
-/* resource "aws_security_group_rule" "lb_egress" {
-  description      = "Allow inbound traffic on port 80"
-  type             = "ingress"
-  from_port        = 0
-  to_port          = 0
-  protocol         = "-1"
-  cidr_blocks      = ["0.0.0.0/0"]
-  security_group_id = aws_security_group.lb_sg.id
-} */
-
 
 resource "aws_s3_bucket" "lb_logs" {
   bucket = "${var.name}-alb-logs-new2"
@@ -368,7 +318,6 @@ resource "aws_security_group" "lb_sg" {
   name        = "${var.name}-lb-sg"
   description = "Allow inbound traffic on port 80 and 443"
   vpc_id      = aws_vpc.app_vpc.id
-  description = "Allow inbound traffic on ports 80 and 443"
 
   ingress {
     from_port   = 80

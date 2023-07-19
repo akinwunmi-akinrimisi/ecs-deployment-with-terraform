@@ -21,7 +21,7 @@ spec:
         app: web-app
     spec:
       containers:
-        - image: public.ecr.aws/m3y1x5s9/bmi-app:latest
+        - image: public.ecr.aws/m3y1x5s9/newbmiapp:latest
           name: web-app
           ports:
             - containerPort: 9900
